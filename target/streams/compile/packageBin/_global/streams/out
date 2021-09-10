@@ -1,0 +1,35 @@
+[0m[[0m[0mdebug[0m] [0m[0mPackaging /Users/steve/Desktop/QRADMM/target/scala-2.12/qradmm_2.12-0.1.jar ...[0m
+[0m[[0m[0mdebug[0m] [0m[0mInput file mappings:[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 8.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 8.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM_Lasso$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM_Lasso$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM_Lasso.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM_Lasso.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 6.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 6.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_broadcast_example.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_broadcast_example.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 4.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 4.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM$ 2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM$ 2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 2.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_broadcast_example$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_broadcast_example$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 5.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 5.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 7.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 7.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_broadcast_example$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_broadcast_example$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	QRADMM 3.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/QRADMM 3.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_rdd_example$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_rdd_example$delayedInit$body.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_rdd_example$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_rdd_example$.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	spark_rdd_example.class[0m
+[0m[[0m[0mdebug[0m] [0m[0m	  /Users/steve/Desktop/QRADMM/target/scala-2.12/classes/spark_rdd_example.class[0m
+[0m[[0m[0mdebug[0m] [0m[0mDone packaging.[0m

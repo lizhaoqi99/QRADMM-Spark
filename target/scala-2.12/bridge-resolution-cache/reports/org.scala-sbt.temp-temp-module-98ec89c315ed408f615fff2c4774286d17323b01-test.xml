@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<?xml-stylesheet type="text/xsl" href="ivy-report.xsl"?>
+<ivy-report version="1.0">
+	<info
+		organisation="org.scala-sbt.temp"
+		module="temp-module-98ec89c315ed408f615fff2c4774286d17323b01"
+		revision="1.5.7"
+		conf="test"
+		confs="compile, runtime, test, provided, optional"
+		date="20210909203717"/>
+	<dependencies>
+		<module organisation="org.scala-sbt" name="compiler-bridge_2.12">
+			<revision name="1.5.7" status="release" pubdate="20210712004700" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/sbt/zinc" extra-info.versionScheme="early-semver" downloaded="false" searched="false" default="false" conf="default, compile, runtime, default(compile), master" position="0">
+				<license name="Apache-2.0" url="https://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="2778" time="0" location="/Users/steve/.ivy2/cache/org.scala-sbt/compiler-bridge_2.12/ivy-1.5.7.xml" searched="false" origin-is-local="false" origin-location="https://repo1.maven.org/maven2/org/scala-sbt/compiler-bridge_2.12/1.5.7/compiler-bridge_2.12-1.5.7.pom"/>
+				<caller organisation="org.scala-sbt.temp" name="temp-module-98ec89c315ed408f615fff2c4774286d17323b01" conf="test, compile, runtime" rev="1.5.7" rev-constraint-default="1.5.7" rev-constraint-dynamic="1.5.7" callerrev="1.5.7"/>
+				<artifacts>
+					<artifact name="compiler-bridge_2.12" type="src" ext="jar" extra-classifier="sources" status="successful" details="" size="53711" time="1356" location="/Users/steve/.ivy2/cache/org.scala-sbt/compiler-bridge_2.12/srcs/compiler-bridge_2.12-1.5.7-sources.jar">
+						<origin-location is-local="false" location="https://repo1.maven.org/maven2/org/scala-sbt/compiler-bridge_2.12/1.5.7/compiler-bridge_2.12-1.5.7-sources.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.scala-sbt" name="compiler-interface">
+			<revision name="1.5.7" status="release" pubdate="20210712004700" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/sbt/zinc" extra-info.versionScheme="early-semver" downloaded="false" searched="false" default="false" conf="master(*), compile, runtime(*), runtime, compile(*), master" position="1">
+				<license name="Apache-2.0" url="https://www.apache.org/licenses/LICENSE-2.0"/>
+				<metadata-artifact status="no" details="" size="2859" time="0" location="/Users/steve/.ivy2/cache/org.scala-sbt/compiler-interface/ivy-1.5.7.xml" searched="false" origin-is-local="false" origin-location="https://repo1.maven.org/maven2/org/scala-sbt/compiler-interface/1.5.7/compiler-interface-1.5.7.pom"/>
+				<caller organisation="org.scala-sbt" name="compiler-bridge_2.12" conf="default, compile, runtime, master" rev="1.5.7" rev-constraint-default="1.5.7" rev-constraint-dynamic="1.5.7" callerrev="1.5.7"/>
+				<artifacts>
+					<artifact name="compiler-interface" type="jar" ext="jar" status="no" details="" size="112363" time="0" location="/Users/steve/.ivy2/cache/org.scala-sbt/compiler-interface/jars/compiler-interface-1.5.7.jar">
+						<origin-location is-local="false" location="UNKNOWN"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+		<module organisation="org.scala-sbt" name="util-interface">
+			<revision name="1.5.0" status="release" pubdate="20210403184952" resolver="sbt-chain" artresolver="sbt-chain" homepage="https://github.com/sbt/sbt" extra-info.versionScheme="early-semver" downloaded="false" searched="false" default="false" conf="master(*), compile, runtime(*), runtime, compile(*), master" position="2">
+				<license name="Apache-2.0" url="https://github.com/sbt/sbt/blob/develop/LICENSE"/>
+				<metadata-artifact status="no" details="" size="2612" time="0" location="/Users/steve/.ivy2/cache/org.scala-sbt/util-interface/ivy-1.5.0.xml" searched="false" origin-is-local="false" origin-location="https://repo1.maven.org/maven2/org/scala-sbt/util-interface/1.5.0/util-interface-1.5.0.pom"/>
+				<caller organisation="org.scala-sbt" name="compiler-interface" conf="compile, runtime" rev="1.5.0" rev-constraint-default="1.5.0" rev-constraint-dynamic="1.5.0" callerrev="1.5.7"/>
+				<artifacts>
+					<artifact name="util-interface" type="jar" ext="jar" status="no" details="" size="2576" time="0" location="/Users/steve/.ivy2/cache/org.scala-sbt/util-interface/jars/util-interface-1.5.0.jar">
+						<origin-location is-local="false" location="https://repo1.maven.org/maven2/org/scala-sbt/util-interface/1.5.0/util-interface-1.5.0.jar"/>
+					</artifact>
+				</artifacts>
+			</revision>
+		</module>
+	</dependencies>
+</ivy-report>
