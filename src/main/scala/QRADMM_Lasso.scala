@@ -6,12 +6,6 @@ import scala.util.control.Breaks._
 
 object QRADMM_Lasso {
 
-//  def soft_threshold(x: DenseVector[Double], lambda: Double, rho: Double): DenseVector[Double] = {
-//    val kappa = lambda / rho
-//    val zeros = DenseVector.zeros[Double](x.length)
-//    max(zeros, x - kappa) - max(zeros, -x - kappa)
-//  }
-
 // p.32
   def soft_threshold(x: DenseVector[Double], y: DenseVector[Double]): DenseVector[Double] = {
     val zeros = DenseVector.zeros[Double](x.length)
@@ -20,84 +14,62 @@ object QRADMM_Lasso {
 
   /**
    *
-   * @param x        design matrix
-   * @param y        response vector
-   * @param beta     initial value of beta
+   * Assume the intercept is included in the model so that the first column of the design matrix x is a vector of 1
+   * @param x_y      a rdd collection consists of the design matrix and the response y
+   * @param tau      quantile of interest
    * @param max_iter maximum number of iterations
    * @param rho      augmentation parameter
    * @param lambda   penalty parameter
-   * @param e_abs    absolute tolerance stopping constant
-   * @param e_rel    relative tolerance stopping constant
-   * @param num_blocks    number of partitions of the original data
+   * @param ABSTOL   absolute tolerance stopping constant
+   * @param RELTOL   relative tolerance stopping constant
+   * @param M        number of partitions of the original data
    * @return vector of coefficient estimates of the linear quantile regression model
    */
-  def betaUpdate_lasso(x: RDD[Array[Double]], y: DenseVector[Double], beta: DenseVector[Double], max_iter: Int = 1000, rho: Double, lambda: Double, e_abs: Double = 1E-5, e_rel: Double = 1E-5, num_blocks: Int): Array[Double] = {
+  def betaUpdate_lasso(x_y: RDD[Array[Double]], tau: Double, max_iter: Int = 1000, rho: Double, lambda: Double, ABSTOL: Double = 1E-7, RELTOL: Double = 1E-4, M: Int): Array[Double] = {
 
-    val sc = x.sparkContext
-    val xmat = DenseMatrix(x.collect():_*) // https://stackoverflow.com/questions/48166561/create-a-breeze-densematrix-from-a-list-of-double-arrays-in-scala
-    val xtmat = xmat.t
-    val xt = sc.parallelize(x.collect().toArray.transpose)
-    var old_beta = beta
-    val p = x.first().length - 1  // assume x includes leading 1's
-    val n = x.count()
-    var curr_iter = 1
-    val data = xt.repartition(num_blocks) // use transpose because we want to iterate over j=0...p
-    val r = y-xmat*beta
+    val sc = x_y.sparkContext
+    val p = x_y.first().length - 2  // assume x includes leading 1's
+    val n = x_y.count()
 
-    /* TODO: wrap everything (x,y,beta,...) into a RDD and utilize map() */
-
-    // put everything in RDD so that we can correspond each element by index (xj, betaj, etc...)
-    // val collection = (xtmat, sj, betaj, rj=(betaold(j)-beta(j))*xj)
-    // D represents the whole for loop where j <- 0 to p
+    val ni = n/M
+    val lambdau = lambda/n
+    val rhou = rho/n
+    val data = x_y.repartition(M)
 
     // calculation will be done by partition/block
-    // so we need to consider if the updates (betaj, sj, ...) can be done in a block fashion
-    // and if we make num_block=p, everything can be done in parallel
-    // -> repartition by column (across p columns)
-    val D: RDD[(Int, (DenseMatrix[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double]))] =
-    data.mapPartitionsWithIndex((i,xj) => {
-//      val xj_vec = xj.toArray
-//      val beta0 =
-//      val sj = r + (old_beta(0) - beta(0)) * x
-      // TODO: this current implementation is INCORRECT since num_block NOT fixed to p
-      val sj = DenseVector[Double](n)
-      val betaj = DenseVector[Double](n)
-      val rj = DenseVector[Double](n)
-      Iterator((i, (xtmat, sj, betaj, rj)))
-    }).persist()
+    // D: RDD[(partition index, (x_b, y_b, beta_b, r_b, u_b, eta_b))]
+    val D: RDD[(Int, (DenseMatrix[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double]))] = {
+      data.mapPartitionsWithIndex((i, x_y_block) => {
+        val x_y_b = DenseMatrix(x_y_block.toArray: _*) // https://stackoverflow.com/questions/48166561/create-a-breeze-densematrix-from-a-list-of-double-arrays-in-scala
+        val x_b = x_y_b(::, 0 to p)
+        val y_b = x_y_b(::, p + 1)
+        Iterator((i, (x_b, y_b, DenseVector[Double](p + 1), DenseVector[Double](n / M), DenseVector[Double](n / M), DenseVector[Double](p + 1))))
+      }).persist()
+    }
 
     // TODO: update checkpoint directory
     D.checkpoint()  // break RDD lineage at each iteration
 
-    while(curr_iter <= max_iter) {
-      old_beta = beta
-//      D = D.map(a => {
-//      })
+//    val r = y-xmat*beta
+    val betaold = DenseVector[Double](p + 1)
+
+    breakable{
+      for (curr_iter <- 1 to max_iter) {
+
+//      old_beta = beta
+      //      D = D.map(a => {
+      //      })
 
 
-//      for (j <- Seq(1,p)) {
-//        if(j == 0) {
-////          beta(0) = sum(y-x*beta)/n
-//        }
-//      }
+      //      for (j <- Seq(1,p)) {
+      //        if(j == 0) {
+      ////          beta(0) = sum(y-x*beta)/n
+      //        }
+      //      }
+
+      }
     }
     Array(0.0)
-  }
-
-  // we can take advantage of big RDD's in the main function
-  // and we can also call broadcast() on r updates since we're applying the soft threshold function to it
-  def solve(): Unit = {
-    // RDD[(partition number, (sj, beta, r))]
-    //      val C: RDD[(Int, (DenseVector[Double], DenseVector[Double], DenseVector[Double]))] =
-    //      {
-    //        data.mapPartitionsWithIndex((i,xj) => {
-    //          val xj_vec = DenseVector(xj.toArray)
-    //          val beta0 =
-    //          val sj = r + (old_beta(0) - beta(0)) * x
-    //          Iterator((i, (xj_vec)))
-    //        })
-    //      }
-    //      C.checkpoint()  // break RDD lineage at each iteration
   }
 
   /**
@@ -116,7 +88,7 @@ object QRADMM_Lasso {
       .getOrCreate()
     val sc = spark.sparkContext
 
-    val arr = Array(Array(1.0, 2.0, 3.0), Array(4.0, 5.0, 6.0))
+    val arr = Array(Array(1.0, 2.0, 3.0), Array(4.0, 5.0, 6.0), Array(4.0, 5.0, 7.0), Array(4.0, 5.0, 8.0))
     val data: RDD[Array[Double]] = sc.parallelize(arr)
     val rdd = data.repartition(2)
     rdd.collect().foreach(x => println(x.mkString(", ")))
@@ -142,30 +114,48 @@ object QRADMM_Lasso {
 //    println(ad)
 
 
-
+    // D = ((1,2),3), ((4,5),6), ((4,5),7), ((4,5),8)
     // big RDD initialization step
-    val C: RDD[(Int, DenseVector[Double])] =
-      D.mapPartitionsWithIndex((i,a) => {
+//    val C: RDD[(Int, DenseVector[Double])] =
+//      D.mapPartitionsWithIndex((i,a) => {
+//        val ar = a.toArray
+//        val matr = DenseMatrix.zeros[Double](4,4)
+//        val vec1 = DenseVector.zeros[Double](4)
+//        //        val vec2 = DenseVector.zeros[Double](2)
+//        var j = 0
+//        ar.foreach(arr => {
+//          vec1(j) = arr._2
+//          j = j + 1
+//        })
+//        Iterator((i, vec1))
+//      }).persist()
+
+//    println(C.count())
+//    C.collect().foreach(a => {
+//      println(a._1)
+//      println(a._2)
+//    })
+
+    val E: RDD[(Int, DenseMatrix[Double])] =
+      rdd.mapPartitionsWithIndex((i,a) => {
         val ar = a.toArray
-        val vec1 = DenseVector.zeros[Double](2)
-        //        val vec2 = DenseVector.zeros[Double](2)
-        var j = 0
-        ar.foreach(arr => {
-          vec1(j) = arr._2
-          j = j + 1
-        })
-        Iterator((i, vec1))
+        val mat = DenseMatrix(ar:_*)
+        Iterator((i,mat))
       }).persist()
 
-
-
-
-
-    println(C.count())
-    C.collect().foreach(a => {
+    E.collect().foreach(a => {
       println(a._1)
       println(a._2)
     })
+
+    println()
+
+    val vec2 = vec.asDenseMatrix.t
+    val vec3 = DenseVector(9.0,10.0)
+    val mat2 = DenseMatrix.horzcat(mat, vec2, vec3.asDenseMatrix.t)
+    println(mat2)
+
+
 
 
 //      .mapPartitionsWithIndex((i,a) => {
