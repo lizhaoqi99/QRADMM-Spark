@@ -3,7 +3,7 @@
 // Coursier does a good job of keeping the compatibility, but some of the feature might be specific to Apache Ivy. In those cases, you can use the following setting to switch back to Ivy:
 ThisBuild / useCoursier := false
 
-name := "QRADMM"
+name := "QRADMM_Spark"
 
 version := "0.1"
 
