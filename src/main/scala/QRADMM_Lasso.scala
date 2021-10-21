@@ -24,9 +24,9 @@ object QRADMM_Lasso {
     val p = x_y.first().length - 2  // assume x includes leading 1's
     val n = x_y.count().toInt
 
-    val original_xy = DenseMatrix(x_y.collect():_*)
-    val original_x = original_xy(::, 0 to p)
-    val original_y = original_xy(::, p+1)
+//    val original_xy = DenseMatrix(x_y.collect():_*)
+//    val original_x = original_xy(::, 0 to p)
+//    val original_y = original_xy(::, p+1)
 
 //    val ni = n/M
     val lambda_adjusted = lambda/n
@@ -37,21 +37,32 @@ object QRADMM_Lasso {
     val x = xy(::, 0 to p)
     val y = xy(::, p+1)
 
+//    print("Printing shuffled data:\n")
+//    print(xy)
+//    print("\n")
     // calculation will be done by partition/block
     // D: RDD[(partition index, (x_b, y_b, beta_b, r_b, u_b, eta_b))]
     // length of D is M
+
     var D: RDD[(Int, (DenseMatrix[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double]))] = {
       data.mapPartitionsWithIndex((i, x_y_block) => {
         val x_y_b = DenseMatrix(x_y_block.toArray: _*) // https://stackoverflow.com/questions/48166561/create-a-breeze-densematrix-from-a-list-of-double-arrays-in-scala
+//        print("loop!!!\n")
+//        println(x_y_b)
         val x_b = x_y_b(::, 0 to p)
         val y_b = x_y_b(::, p + 1)
         // r_b: DenseVector[Double](n / M)
         val r_b = y.slice(n/M*i,n/M*i+n/M)
-        Iterator((i, (x_b, y_b, DenseVector[Double](p + 1), r_b, DenseVector[Double](n / M), DenseVector[Double](p + 1))))
+        Iterator((i, (x_b, y_b, DenseVector.zeros[Double](p + 1), r_b, DenseVector.zeros[Double](n / M), DenseVector.zeros[Double](p + 1))))
       }).persist()
     }
 
-    // TODO: update checkpoint directory
+//    print("Printing Old D:\n")
+//    D.collect().foreach(a => {
+//      println(a._1)
+//      println(a._2)
+//    })
+
     D.checkpoint()  // break RDD lineage at each iteration
 
 //    val r = y-xmat*beta
@@ -61,21 +72,36 @@ object QRADMM_Lasso {
     var snorm = 0.0
     var e_pri = 0.0
     var e_dual = 0.0
+    var niter = 0
 
-    breakable{
+    breakable {
       for (curr_iter <- 1 to max_iter) {
+        niter = curr_iter
+//        println(curr_iter)
 
-        val beta_avg = D.map(a => a._2._3).reduce(_+_)/M.toDouble
-        val eta_avg = D.map(a => a._2._6).reduce(_+_)/M.toDouble
+        val beta_avg = D.map(a => a._2._3).reduce(_ + _) / M.toDouble
+//        D.map(a=>a._2._3).foreach(println)
+        val eta_avg = D.map(a => a._2._6).reduce(_ + _) / M.toDouble
         betaold = beta
+//        println(beta_avg)
+//        println(eta_avg)
 
         // update beta
-        val df = DenseVector.fill(p+1, lambda_adjusted)
+        val df = DenseVector.fill(p, lambda_adjusted)
 
         val beta_0 = beta_avg(0) + eta_avg(0)/rho_adjusted
+//        println(beta_avg.slice(1,p+1))
+//        println(df)
+//        println(beta_avg.slice(1,p+1)+eta_avg.slice(1,p+1)/rho_adjusted)
+//        println("df/(rho_adj*M)")
+//        println(df/(rho_adjusted*M))
         val beta_1_to_p = soft_threshold(beta_avg.slice(1,p+1)+eta_avg.slice(1,p+1)/rho_adjusted, df/(rho_adjusted*M))
+
+//        println("Beta[1:p]")
+//        println(beta_1_to_p)
         val betanew: DenseVector[Double] = DenseVector.vertcat(DenseVector(beta_0), beta_1_to_p)
         beta = betanew
+
 
         // Todo: implement r_b, beta_b, u_b, eta_b update from D:RDD[]; use broadcast() in the r-update
         // operation on each block of data
@@ -103,6 +129,14 @@ object QRADMM_Lasso {
 
         D.checkpoint()
 
+//        print("Printing New D:\n")
+//        D.collect().foreach(a => {
+//          println(a._1)
+//          println(a._2)
+//        })
+//      }
+//    }
+
         // collect r_b from each block and form r which has length n
         val r = DenseVector(D.map(a => a._2._4).collect().flatMap(x => x.toArray))
         // collect u_b from each block and form u which has length n
@@ -126,7 +160,11 @@ object QRADMM_Lasso {
         }
       }
     }
+    println(s"It takes $niter iterations to converge")
+
     beta.toArray
+
+//    Array(1.0)
   }
 
   // p.32

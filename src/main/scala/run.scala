@@ -1,6 +1,7 @@
 import breeze.linalg._
 import org.apache.spark.rdd.RDD
 import org.apache.spark.sql.SparkSession
+import breeze.stats.distributions.Rand
 
 object run {
 
@@ -153,9 +154,10 @@ object run {
     println(h(::,0 to 1))
 
 
-
-
      */
+
+
+
     spark.stop()
   }
 }
