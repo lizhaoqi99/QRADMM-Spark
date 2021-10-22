@@ -160,7 +160,7 @@ object QRADMM_Lasso {
         }
       }
     }
-    println(s"It takes $niter iterations to converge")
+//    println(s"It takes $niter iterations to converge")
 
     beta.toArray
 
