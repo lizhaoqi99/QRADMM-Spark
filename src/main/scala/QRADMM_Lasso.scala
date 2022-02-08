@@ -18,7 +18,7 @@ object QRADMM_Lasso {
    * @param M        number of partitions of the original data
    * @return vector of coefficient estimates of the linear quantile regression model
    */
-  def solve(x_y: RDD[Array[Double]], tau: Double, max_iter: Int = 1000, rho: Double, lambda: Double, ABSTOL: Double = 1E-7, RELTOL: Double = 1E-4, M: Int): Array[Double] = {
+  def solve(x_y: RDD[Array[Double]], tau: Double, max_iter: Int = 100, rho: Double, lambda: Double, ABSTOL: Double = 1E-7, RELTOL: Double = 1E-4, M: Int): Array[Double] = {
 
     val sc = x_y.sparkContext
     val p = x_y.first().length - 2  // assume x includes leading 1's
@@ -41,7 +41,7 @@ object QRADMM_Lasso {
 //    print(xy)
 //    print("\n")
     // calculation will be done by partition/block
-    // D: RDD[(partition index, (x_b, y_b, beta_b, r_b, u_b, eta_b))]
+    // D: RDD[(partition index, (x_b, y_b, beta_b, r_b, u_b, eta_b)]
     // length of D is M
 
     var D: RDD[(Int, (DenseMatrix[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double], DenseVector[Double]))] = {
@@ -52,9 +52,10 @@ object QRADMM_Lasso {
         val x_b = x_y_b(::, 0 to p)
         val y_b = x_y_b(::, p + 1)
         // r_b: DenseVector[Double](n / M)
-        val r_b = y.slice(n/M*i,n/M*i+n/M)
+//        val r_b = y.slice(n/M*i,n/M*i+n/M)
+        val r_b = y_b
         Iterator((i, (x_b, y_b, DenseVector.zeros[Double](p + 1), r_b, DenseVector.zeros[Double](n / M), DenseVector.zeros[Double](p + 1))))
-      }).persist()
+      }).cache()
     }
 
 //    print("Printing Old D:\n")
@@ -78,10 +79,15 @@ object QRADMM_Lasso {
       for (curr_iter <- 1 to max_iter) {
         niter = curr_iter
 //        println(curr_iter)
-
+//        val t1 = System.nanoTime()
         val beta_avg = D.map(a => a._2._3).reduce(_ + _) / M.toDouble
+//        println("DMap")
 //        D.map(a=>a._2._3).foreach(println)
+
         val eta_avg = D.map(a => a._2._6).reduce(_ + _) / M.toDouble
+//        val t2 = System.nanoTime()
+//        val diff = (t2-t1)/1e9d
+//        println(s"The program took $diff seconds.")
         betaold = beta
 //        println(beta_avg)
 //        println(eta_avg)
@@ -90,9 +96,9 @@ object QRADMM_Lasso {
         val df = DenseVector.fill(p, lambda_adjusted)
 
         val beta_0 = beta_avg(0) + eta_avg(0)/rho_adjusted
-//        println(beta_avg.slice(1,p+1))
+//        println(s"beta: ${beta_avg.slice(1,p+1)}")
 //        println(df)
-//        println(beta_avg.slice(1,p+1)+eta_avg.slice(1,p+1)/rho_adjusted)
+//        println(s"whole: ${beta_avg.slice(1,p+1)+eta_avg.slice(1,p+1)/rho_adjusted}")
 //        println("df/(rho_adj*M)")
 //        println(df/(rho_adjusted*M))
         val beta_1_to_p = soft_threshold(beta_avg.slice(1,p+1)+eta_avg.slice(1,p+1)/rho_adjusted, df/(rho_adjusted*M))
@@ -101,8 +107,9 @@ object QRADMM_Lasso {
 //        println(beta_1_to_p)
         val betanew: DenseVector[Double] = DenseVector.vertcat(DenseVector(beta_0), beta_1_to_p)
         beta = betanew
+//        println(beta)
 
-
+        D.unpersist()
         // Todo: implement r_b, beta_b, u_b, eta_b update from D:RDD[]; use broadcast() in the r-update
         // operation on each block of data
         D = D.map(a => {
@@ -116,10 +123,15 @@ object QRADMM_Lasso {
           val xbeta_b = x_b * beta_b
 
           // update r_b
-          val temp = DenseVector.fill(n/M, 1.0/(n*rho_adjusted))
-          val r_b_new = soft_threshold(u_b/rho_adjusted+y_b-xbeta_b-1/2*(2*tau-1)/(n*rho), temp)
-          // update beta_b
+          val temp = DenseVector.fill(n/M, 0.5/(n*rho_adjusted))
+          val r_b_new = soft_threshold(u_b/rho_adjusted+y_b-xbeta_b-0.5*(2*tau-1)/(n*rho), temp)
+//          // update beta_b
+//          println("hello")
+//          println(x_b)
+//          println("hellofasf")
+//          println(x_b.t*(y_b-r_b_new+u_b/rho_adjusted)-eta_b/rho_adjusted+beta)
           val beta_b_new = inv(x_b.t*x_b+DenseMatrix.eye[Double](p+1)) * (x_b.t*(y_b-r_b_new+u_b/rho_adjusted)-eta_b/rho_adjusted+beta)
+//          val beta_b_new = x_b.t*(y_b-r_b_new+u_b/rho_adjusted)-eta_b/rho_adjusted+beta_b
           // update u_b
           val u_b_new = u_b + rho_adjusted*(y_b-xbeta_b-r_b_new)
           // update eta_b
@@ -127,20 +139,27 @@ object QRADMM_Lasso {
           (a._1, (x_b,y_b,beta_b_new,r_b_new,u_b_new,eta_b_new))
         })
 
+        D.cache()
+        // override last RDD at each iteration
         D.checkpoint()
 
+//        println(s"curr_iter: $curr_iter")
 //        print("Printing New D:\n")
 //        D.collect().foreach(a => {
 //          println(a._1)
-//          println(a._2)
+//          println(a._2._2)
+//          println(a._2._3)
 //        })
 //      }
 //    }
-
+//        val t1 = System.nanoTime()
         // collect r_b from each block and form r which has length n
         val r = DenseVector(D.map(a => a._2._4).collect().flatMap(x => x.toArray))
         // collect u_b from each block and form u which has length n
         val u = DenseVector(D.map(a => a._2._5).collect().flatMap(x => x.toArray))
+//        val t2 = System.nanoTime()
+//        val diff = (t2-t1)/1e9d
+//        println(s"The program took $diff seconds.")
 
         rnorm = math.sqrt(sum(square(y-x*beta)))
         snorm = math.sqrt(sum(square(rho_adjusted*x(::, 1 to p)*(beta.slice(1,p+1)-betaold.slice(1,p+1)))))
@@ -170,6 +189,7 @@ object QRADMM_Lasso {
   // p.32
   def soft_threshold(x: DenseVector[Double], y: DenseVector[Double]): DenseVector[Double] = {
     val zeros = DenseVector.zeros[Double](x.length)
+
     max(zeros, x - y) - max(zeros, -x - y)
   }
 
