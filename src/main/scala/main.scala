@@ -50,15 +50,11 @@ object main {
 
     val spark = SparkSession.builder()
       .appName("main")
-      .master("local")
+      .master("local[10]")
       .config("spark.driver.memory","8g")
       .config("spark.driver.cores","10")
       .getOrCreate()
 
-//      .master("local[10]")
-//      .config("spark.driver.memory","8g")
-//      .config("spark.driver.cores","10")
-/*
     val sc = spark.sparkContext
     sc.setLogLevel("ERROR")
     sc.setCheckpointDir("/Users/steve/Desktop/checkpoint")
@@ -78,6 +74,6 @@ object main {
     beta.foreach(println)
 
     spark.stop()
-     */
+
   }
 }
