@@ -1,5 +1,5 @@
 # QRADMM-Spark
-Scala-Spark package for penalized quantile regression implementing QRADMM algorithm from 
+Scala-Spark package for penalized quantile regression implementing QPADM algorithm from 
 
 Yu L., Lin N., and Wang L. “A Parallel Algorithm for Large-Scale Nonconvex Penalized
 Quantile Regression.” In: Journal of Computational and Graphical Statistics 26.4 (2017),
