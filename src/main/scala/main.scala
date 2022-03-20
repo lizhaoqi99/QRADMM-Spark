@@ -49,7 +49,7 @@ object main {
 //
 
     val spark = SparkSession.builder()
-      .appName("main")
+      .appName("test1")
       .master("local[10]")
       .config("spark.driver.memory","8g")
       .config("spark.driver.cores","10")

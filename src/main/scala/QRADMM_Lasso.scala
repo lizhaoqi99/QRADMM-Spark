@@ -175,7 +175,7 @@ object QRADMM_Lasso {
 
         // check stopping criterion
         if(rnorm <= e_pri && snorm <= e_dual) {
-          break()
+          break
         }
       }
     }
