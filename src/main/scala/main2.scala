@@ -34,7 +34,7 @@ object main2 {
 
     val sc = spark.sparkContext
     sc.setLogLevel("ERROR")
-    sc.setCheckpointDir("/Users/steve/Desktop/checkpoint")
+    sc.setCheckpointDir("checkpoint")
 
     var arr = ofDim[Double](p+2, n)
     for(i <- 0 to p+1) {

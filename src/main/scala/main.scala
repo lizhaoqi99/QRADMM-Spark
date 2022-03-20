@@ -57,7 +57,7 @@ object main {
 
     val sc = spark.sparkContext
     sc.setLogLevel("ERROR")
-    sc.setCheckpointDir("/Users/steve/Desktop/checkpoint")
+    sc.setCheckpointDir("checkpoint")
 
     val data = sc.parallelize(arr)
 
