@@ -6,8 +6,8 @@ import scala.Array.ofDim
 
 object main {
   def main(args: Array[String]): Unit = {
-    val n = 50000
-    val p = 30
+    val n = 300000
+    val p = 150
     val X: DenseMatrix[Double] = DenseMatrix.zeros[Double](n, p+1)
     X(::, 0) := DenseVector.ones[Double](n)
     for(i <- 1 to p) {
